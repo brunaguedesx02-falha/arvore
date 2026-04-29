@@ -1,0 +1,222 @@
+import os
+
+class ArrayList:
+    def __init__(self):
+        self.MEMORY_SPACE = 10
+        self.lastPosition = 0
+        self.array = [None] * self.MEMORY_SPACE
+
+    def get(self, position: int):
+        if (position < 0 or position > (self.size() - 1)):
+            raise IndexError("Index out of bounds exception")
+        return self.array[position]
+
+    def updateRemoveArray(self, start: int, end: int):
+        for index in range(start, end):
+            self.array[index] = self.array[index + 1]
+        self.lastPosition -= 1
+
+    def updateInsertArray(self, start: int, end: int):
+        for index in range(start, end, -1):
+            self.array[index] = self.array[index - 1]
+        self.lastPosition += 1
+
+    def removeAll(self):
+        self.lastPosition = 0
+
+    def add(self, value):
+        if (self.lastPosition == self.capacity()):
+            self.resizeMemory()
+        self.array[self.lastPosition] = value
+        self.lastPosition += 1
+
+    def insertAt(self, value, position: int):
+        if (position < 0 or position > self.lastPosition):
+            raise IndexError("Index out of bounds exception")
+        if (self.lastPosition == self.capacity()):
+            self.resizeMemory()
+        self.updateInsertArray(self.lastPosition, position)
+        self.array[position] = value
+
+    def removeAt(self, position: int):
+        if (position < 0 or position > (self.size() - 1)):
+            raise IndexError("Index out of bounds exception")
+        copy = self.array[position]
+        self.updateRemoveArray(position, self.size() - 1)
+        return copy
+
+    def remove(self):
+        last = self.array[self.lastPosition - 1]
+        self.lastPosition -= 1
+        return last
+
+    def capacity(self):
+        return len(self.array)
+
+    def size(self):
+        return self.lastPosition
+
+    def print(self):
+        for position in range(0, self.lastPosition):
+            print(self.array[position])
+
+    def resizeMemory(self):
+        print("Mais memoria man")
+        newArray = [None] * (self.capacity() * 2)
+        for position in range(self.capacity()):
+            newArray[position] = self.array[position]
+        self.array = newArray
+
+
+class Musica:
+    def __init__(self, titulo, artista, duracao):
+        self.titulo = titulo
+        self.artista = artista
+        self.duracao = duracao
+
+    def __str__(self):
+        return f"{self.titulo} - {self.artista} ({self.duracao})"
+
+
+VERDE   = "\033[92m"
+CIANO   = "\033[96m"
+AMARELO = "\033[93m"
+ROSA    = "\033[95m"
+VERMELHO = "\033[91m"
+DIM     = "\033[2m"
+NEGRITO = "\033[1m"
+RESET   = "\033[0m"
+
+
+playlist  = ArrayList()
+historico = ArrayList()
+
+
+playlist.add(Musica("Quem Ama Sempre Entende",   "Henrique & Juliano",        "2:44"))
+playlist.add(Musica("Chorando Sem Ver",          "Felipe e Rodrigo",          "2:45"))
+playlist.add(Musica("De Copo Em Copo",           "George Henrique & Rodrigo", "2:38"))
+playlist.add(Musica("Pra Não Pensar Em Você",    "Zezé de Camargo e Luciano", "5:02"))
+playlist.add(Musica("Olhos Castanhos de Alguém", "Jads e Jadson",             "3:41"))
+playlist.add(Musica("Bebida na Ferida",          "Zé Neto & Cristiano",       "2:43"))
+
+
+while True:
+    os.system("cls" if os.name == "nt" else "clear")
+
+    # exibe o cabeçalho
+    print(f"{NEGRITO}{CIANO}╔══════════════════════════════════════════════════════╗")
+    print(f"║           🎵  PLAYLIST ESQUENTA SERTANEJO 🔥         ║")
+    print(f"╚══════════════════════════════════════════════════════╝{RESET}")
+
+    # exibe a fila atual
+    print(f"\n{NEGRITO}  FILA DE REPRODUÇÃO{RESET}  {DIM}({playlist.size()} músicas){RESET}")
+    print(f"  {'─' * 50}")
+
+    if playlist.size() == 0:
+        print(f"  {DIM}Nenhuma musica na fila.{RESET}")
+    else:
+        for i in range(playlist.size()):
+            musica = playlist.get(i)
+            if i == 0:
+                print(f"  {VERDE}{NEGRITO}▶  {musica.titulo}{RESET}") # type: ignore
+                print(f"     {VERDE}{musica.artista}  •  {musica.duracao}{RESET}") # type: ignore
+                print(f"  {DIM}1   ── tocando agora ──{RESET}")
+            else:
+                print(f"  {DIM}{i:>2}.{RESET}  {musica.titulo}") # type: ignore
+                print(f"       {DIM}{musica.artista}  •  {musica.duracao}{RESET}") # type: ignore
+
+    print(f"  {'─' * 50}")
+    print(f"  {DIM}Historico: {historico.size()} musica(s) tocada(s){RESET}\n")
+
+    # Menu de opções
+    print(f"{NEGRITO}  OPÇÕES{RESET}")
+    print(f"  {CIANO}1{RESET}  Adicionar musica no final da fila")
+    print(f"  {CIANO}2{RESET}  Tocar proxima musica")
+    print(f"  {CIANO}3{RESET}  Voltar musica anterior")
+    print(f"  {CIANO}4{RESET}  Inserir como proxima a tocar")
+    print(f"  {CIANO}5{RESET}  Remover musica da fila")
+    print(f"  {CIANO}6{RESET}  Ver capacidade do array")
+    print(f"  {VERMELHO}0{RESET}  Sair\n")
+
+    opcao = input(f"  {NEGRITO}→ Escolha uma opcao: {RESET}").strip()
+
+    # ── 1: Adicionar musica no final da fila
+    if opcao == "1":
+        print(f"\n{AMARELO}  ── Nova musica ──{RESET}")
+        titulo  = input("  Titulo:          ").strip() or "Sem titulo"
+        artista = input("  Artista:         ").strip() or "Desconhecido"
+        duracao = input("  Duracao (mm:ss): ").strip() or "0:00"
+        musica  = Musica(titulo, artista, duracao)
+        playlist.add(musica)
+        print(f"\n  {VERDE}✔ \"{musica.titulo}\" adicionada no final da fila.{RESET}")
+        input(f"  {DIM}[Enter para continuar]{RESET}")
+
+    # ── 2: Tocar proxima musica
+    elif opcao == "2":
+        if playlist.size() == 0:
+            print(f"\n  {VERMELHO}✖ A playlist esta vazia.{RESET}")
+        else:
+            tocando = playlist.removeAt(0)
+            historico.add(tocando)
+            print(f"\n  {VERDE}▶ Tocando: {tocando}{RESET}")
+        input(f"  {DIM}[Enter para continuar]{RESET}")
+
+    # ── 3: Voltar musica anterior
+    elif opcao == "3":
+        if historico.size() == 0:
+            print(f"\n  {VERMELHO}✖ Nao ha musicas no historico.{RESET}")
+        else:
+            anterior = historico.remove()
+            playlist.insertAt(anterior, 0)
+            print(f"\n  {CIANO}⏮ Voltando para: {anterior}{RESET}")
+        input(f"  {DIM}[Enter para continuar]{RESET}")
+
+    # ── 4: Inserir como proxima a tocar
+    elif opcao == "4":
+        print(f"\n{AMARELO}  ── Nova musica ──{RESET}")
+        titulo  = input("  Titulo:          ").strip() or "Sem titulo"
+        artista = input("  Artista:         ").strip() or "Desconhecido"
+        duracao = input("  Duracao (mm:ss): ").strip() or "0:00"
+        musica  = Musica(titulo, artista, duracao)
+        if playlist.size() == 0:
+            playlist.add(musica)
+        else:
+            playlist.insertAt(musica, 1)
+        print(f"\n  {ROSA} \"{musica.titulo}\" sera a proxima a tocar.{RESET}")
+        input(f"  {DIM}[Enter para continuar]{RESET}")
+
+    # ── 5: Remover musica da fila
+    elif opcao == "5":
+        if playlist.size() == 0:
+            print(f"\n  {VERMELHO}✖ A playlist esta vazia.{RESET}")
+            input(f"  {DIM}[Enter para continuar]{RESET}")
+        else:
+            print(f"\n{NEGRITO}  Escolha o numero da musica:{RESET}")
+            for i in range(playlist.size()):
+                musica = playlist.get(i)
+                print(f"  {CIANO}{i}{RESET}  {musica.titulo} {DIM}- {musica.artista}{RESET}") # type: ignore
+            try:
+                idx = int(input("\n  Numero da musica para remover: "))
+                removida = playlist.removeAt(idx)
+                print(f"\n  {AMARELO} \"{removida.titulo}\" removida da fila.{RESET}") # type: ignore
+            except (ValueError, IndexError):
+                print(f"\n  {VERMELHO}✖ Indice invalido.{RESET}")
+            input(f"  {DIM}[Enter para continuar]{RESET}")
+
+    # ── 6: Ver capacidade do array
+    elif opcao == "6":
+        print(f"\n{NEGRITO}  Informacoes do array interno:{RESET}")
+        print(f"  Musicas na fila:  {VERDE}{playlist.size()}{RESET}")
+        print(f"  Capacidade atual: {CIANO}{playlist.capacity()}{RESET}")
+        print(f"  Espacos livres:   {DIM}{playlist.capacity() - playlist.size()}{RESET}")
+        input(f"  {DIM}[Enter para continuar]{RESET}")
+
+    # ── 0: sair 
+    elif opcao == "0":
+        os.system("cls" if os.name == "nt" else "clear")
+        print(f"\n  {CIANO}{NEGRITO}Ate a Proxima! 🎵{RESET}\n")
+        break
+
+    else:
+        print(f"\n  {VERMELHO}✖ Opcao invalida.{RESET}")
+        input(f"  {DIM}[Enter para continuar]{RESET}")
